@@ -5,10 +5,16 @@ export default function Modal({ children, open, className = "" }) {
   const dialog = useRef();
 
   useEffect(() => {
+    // ensure the dialog you open and close is the same one (the clean up function is run later)
+    const modal = dialog.current;
+
     if (open) {
-      dialog.current.showModal();
+      modal.showModal();
     }
+
+    return () => modal.close();
   }, [open]);
+
   return createPortal(
     <dialog ref={dialog} className={`modal ${className}`}>
       {children}

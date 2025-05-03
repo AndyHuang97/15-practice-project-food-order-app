@@ -1,4 +1,3 @@
-import { use } from "react";
 import { createContext, useReducer } from "react";
 
 const CartContext = createContext({
