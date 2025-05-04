@@ -7,6 +7,7 @@ async function sendHttpRequest(url, config) {
   const resData = await response.json();
 
   if (!response.ok) {
+    console.log("request failed", resData);
     throw new Error(resData.message || "Request failed!");
   }
 
@@ -18,15 +19,19 @@ export default function useHttp(url, config, initialData) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState();
 
+  function clearData() {
+    setData(initialData);
+  }
+  
   // this function is used to update the UI
   // it's called in two places:
   // 1. on initial render to fetch data
   // 2. when the user submits the form to send data
   const sendRequest = useCallback(
-    async function sendRequest() {
+    async function sendRequest(data) {
       setIsLoading(true);
       try {
-        const resData = await sendHttpRequest(url, config);
+        const resData = await sendHttpRequest(url, { ...config, body: data });
         setData(resData);
       } catch (error) {
         setError(error.message || "Something went wrong!");
@@ -48,5 +53,6 @@ export default function useHttp(url, config, initialData) {
     isLoading,
     error,
     sendRequest, // for submitting data on user action in checkout
+    clearData,
   };
 }
