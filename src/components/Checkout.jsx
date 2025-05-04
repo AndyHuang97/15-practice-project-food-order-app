@@ -8,6 +8,7 @@ import Input from "./UI/Input.jsx";
 import Button from "./UI/Button.jsx";
 import useHttp from "../hooks/useHttp.js";
 import Error from "./Error.jsx";
+import { useActionState } from "react";
 
 const requestConfig = {
   method: "POST",
@@ -22,7 +23,6 @@ export default function Checkout() {
 
   const {
     data,
-    isLoading: isSending,
     error,
     sendRequest,
     clearData
@@ -42,13 +42,11 @@ export default function Checkout() {
     clearData();
   }
 
-  function handleSubmit(event) {
-    event.preventDefault();
-
-    const fd = new FormData(event.target);
+  // need to be an async for the useActionState to work
+  async function checkouAction(prevState, fd) {
     const customerData = Object.fromEntries(fd.entries());
 
-    sendRequest(
+    await sendRequest(
       JSON.stringify({
         order: {
           customer: customerData,
@@ -57,6 +55,8 @@ export default function Checkout() {
       })
     );
   }
+
+  const [formState, formAction, isSending] = useActionState(checkouAction, null);
 
   let actions = (
     <>
@@ -92,7 +92,7 @@ export default function Checkout() {
 
   return (
     <Modal open={userProgressCtx.progress === "checkout"} onClose={handleClose}>
-      <form onSubmit={handleSubmit}>
+      <form action={formAction}>
         <h2>Checkout</h2>
         <p>Total Amount: {currencyFormatter.format(cartTotal)}</p>
         <Input label='Full Name' type='text' id='name' />
